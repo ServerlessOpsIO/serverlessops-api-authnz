@@ -1,0 +1,50 @@
+Metadata:
+  UserPool:
+    localTemplateFile: &user_pool_template_body ./stacksets/userpool/stackset.yaml
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ServerlessOps API Authnz Service
+
+Parameters:
+  TargetRegions:
+    Type: CommaDelimitedList
+    Description: "Regions to deploy to"
+  TargetOuIds:
+    Type: CommaDelimitedList
+    Description: "Organizational Units to deploy to"
+  TargetAccountIds:
+    Type: CommaDelimitedList
+    Description: "Accounts to deploy to"
+  UserPoolName:
+    Type: String
+    Description: Name of UserPool
+
+Resources:
+  UserPoolStackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: ServerlessOpsAuthnz
+      Description: ServerlessOps Cognito User Pool
+      Parameters:
+        - ParameterKey: UserPoolName
+          ParameterValue: !Ref UserPoolName
+      StackInstancesGroup:
+        - DeploymentTargets:
+            AccountFilterType: INTERSECTION
+            OrganizationalUnitIds: !Ref TargetOuIds
+            Accounts: !Ref TargetAccountIds
+          Regions: !Ref TargetRegions
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      PermissionModel: SERVICE_MANAGED
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+        - CAPABILITY_AUTO_EXPAND
+      TemplateBody: *user_pool_template_body

@@ -1,0 +1,13 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: serverlessops-api-authnz
+  description: ServerlessOps API Authnz Service
+  annotations:
+    github.com/project-slug: ServerlessOpsIO/serverlessops-api-authnz/=
+spec:
+  type: api
+  lifecycle: production
+  owner: group:admins
+  system: ServerlessOps API Authnz

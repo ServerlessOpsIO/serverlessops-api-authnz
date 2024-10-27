@@ -1,0 +1,12 @@
+{
+    "Domain": "infra",
+    "System": "ApiAuthnz",
+    "Component": $env.GITHUB_REPOSITORY_NAME_PART_SLUG_CS,
+    "CodeBranch": $env.GITHUB_REF_SLUG_CS,
+    "UserPoolName": $secrets.USER_POOL_NAME,
+    "UserPoolDomainName": $secrets.USER_POOL_DOMAIN_NAME,
+    "DnsZoneId": "/org/dns/ZoneId",
+    "TargetOuIds": $secrets.DEPLOYMENT_TARGET_OU,
+    "TargetRegions": "us-east-1",
+    "TargetAccountIds": $secrets.DEPLOYMENT_TARGET_ACCOUNT_ID,
+}
