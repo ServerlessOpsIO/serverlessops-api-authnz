@@ -5,6 +5,12 @@ Parameters:
   UserPoolName:
     Type: String
     Description: Name of UserPool
+  UserPoolDomainName:
+    Type: String
+    Description: Name of UserPool Domain
+  ParentDnsZoneId:
+    Type: String
+    Description: "Route53 Hosted Zone ID"
 
 Resources:
   UserPool:
@@ -15,3 +21,40 @@ Resources:
       UserPoolName: !Ref UserPoolName
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: true
+
+  # DNS
+  #
+  # Cognito site verification requires either an A record at the root of the site's domain or a
+  # delegation to another zone. Rathert than mess with the serverlessops.io apex record we
+  # create a new zone for the user pool domain and add a delegation set to the parent zone.
+
+  AuthnzZone:
+    Type: "AWS::Route53::HostedZone"
+    Properties:
+      Name: !Ref UserPoolDomainName
+      HostedZoneConfig:
+        Comment: ServerlessOps Authnz
+
+  AuthnzDelegationSet:
+    Type: "AWS::Route53::RecordSet"
+    Properties:
+      HostedZoneId: !Ref ParentDnsZoneId
+      Name: !Ref UserPoolDomainName
+      Type: NS
+      TTL: '3600'
+      ResourceRecords: !GetAtt AuthnzZone.NameServers
+
+  SiteCertificate:
+    Type: AWS::CertificateManager::Certificate
+    DependsOn: AuthnzZone
+    Properties:
+      DomainName: !Ref UserPoolDomainName
+      ValidationMethod: DNS
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref UserPoolDomainName
+      UserPoolId: !Ref UserPool
+      CustomDomainConfig:
+        CertificateArn: !Ref SiteCertificate

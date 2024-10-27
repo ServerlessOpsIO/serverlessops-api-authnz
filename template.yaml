@@ -18,6 +18,12 @@ Parameters:
   UserPoolName:
     Type: String
     Description: Name of UserPool
+  UserPoolDomainName:
+    Type: String
+    Description: Name of UserPool Domain
+  ParentDnsZoneId:
+    Type: String
+    Description: "Route53 Hosted Zone ID of parent zone"
 
 Resources:
   UserPoolStackSet:
@@ -28,6 +34,10 @@ Resources:
       Parameters:
         - ParameterKey: UserPoolName
           ParameterValue: !Ref UserPoolName
+        - ParameterKey: UserPoolDomainName
+          ParameterValue: !Ref UserPoolDomainName
+        - ParameterKey: ParentDnsZoneId
+          ParameterValue: !Ref ParentDnsZoneId
       StackInstancesGroup:
         - DeploymentTargets:
             AccountFilterType: INTERSECTION
