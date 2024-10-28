@@ -46,10 +46,12 @@ Resources:
 
   SiteCertificate:
     Type: AWS::CertificateManager::Certificate
-    DependsOn: AuthnzZone
     Properties:
       DomainName: !Ref UserPoolDomainName
       ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref UserPoolDomainName
+          HostedZoneId: !GetAtt AuthnzZone.Id
 
   UserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
