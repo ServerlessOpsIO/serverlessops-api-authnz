@@ -1,6 +1,8 @@
 Metadata:
   UserPool:
     localTemplateFile: &user_pool_template_body ./stacksets/userpool/stackset.yaml
+  Products:
+    localTemplateFile: &products_template_body ./products/stackset.yaml
 
 AWSTemplateFormatVersion: '2010-09-09'
 Description: ServerlessOps API Authnz Service
@@ -24,6 +26,12 @@ Parameters:
   ParentDnsZoneId:
     Type: String
     Description: "Route53 Hosted Zone ID of parent zone"
+  GitHubSha:
+    Type: String
+    Description: GitHub SHA
+  CfnTemplateBucket:
+    Type: String
+    Description: The S3 bucket CloudFormation templates are stored
 
 Resources:
   UserPoolStackSet:
@@ -58,3 +66,34 @@ Resources:
         - CAPABILITY_NAMED_IAM
         - CAPABILITY_AUTO_EXPAND
       TemplateBody: *user_pool_template_body
+
+  ProductsStackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: ServerlessOpsAuthnzProducts
+      Description: ServerlessOps Authnz Service Catalog Products
+      Parameters:
+        - ParameterKey: GitHubSha
+          ParameterValue: !Ref GitHubSha
+        - ParameterKey: CfnTemplateBucket
+          ParameterValue: !Ref CfnTemplateBucket
+      StackInstancesGroup:
+        - DeploymentTargets:
+            AccountFilterType: INTERSECTION
+            OrganizationalUnitIds: !Ref TargetOuIds
+            Accounts: !Ref TargetAccountIds
+          Regions: !Ref TargetRegions
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      PermissionModel: SERVICE_MANAGED
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+        - CAPABILITY_AUTO_EXPAND
+      TemplateBody: *products_template_body

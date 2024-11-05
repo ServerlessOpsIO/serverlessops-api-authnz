@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create a Cognito Resource Server
+
+Parameters:
+  CognitoUserPoolId:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: The ID of the user pool to which the resource server belongs
+    Default: /org/authnz/UserPoolId
+  ApplicationName:
+    Type: String
+    Description: The name of the application
+  ApplicationUrl:
+    Type: String
+    Description: The URL of the application
+  ScopeName:
+    Type: String
+    Description: The name of the scope
+  ReadActionAvailable:
+    Type: String
+    Description: Whether the read scope is available
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'true'
+  WriteActionAvailable:
+    Type: String
+    Description: Whether the write scope is available
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'true'
+  ListActionAvailable:
+    Type: String
+    Description: Whether the list scope is available
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'true'
+  AdminActionAvailable:
+    Type: String
+    Description: Whether the admin scope is available
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+
+Conditions:
+  HasReadAction: !Equals [!Ref ReadActionAvailable, 'true']
+  HasWriteAction: !Equals [!Ref WriteActionAvailable, 'true']
+  HasListAction: !Equals [!Ref ListActionAvailable, 'true']
+  HasAdminAction: !Equals [!Ref AdminActionAvailable, 'true']
+
+Resources:
+  CognitoResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      Name: !Ref ApplicationName
+      Identifier: !Ref ApplicationUrl
+      UserPoolId: !Ref CognitoUserPoolId
+      Scopes:
+        - Fn::If:
+          - HasReadAction
+          - ScopeName: !Sub '${ScopeName}.read'
+            ScopeDescription: Read access
+          - Ref: AWS::NoValue
+        - Fn::If:
+          - HasWriteAction
+          - ScopeName: !Sub '${ScopeName}.write'
+            ScopeDescription: Write access
+          - Ref: AWS::NoValue
+        - Fn::If:
+          - HasListAction
+          - ScopeName: !Sub '${ScopeName}.list'
+            ScopeDescription: List access
+          - Ref: AWS::NoValue
+        - Fn::If:
+          - HasAdminAction
+          - ScopeName: !Sub '${ScopeName}.admin'
+            ScopeDescription: Admin access
+          - Ref: AWS::NoValue

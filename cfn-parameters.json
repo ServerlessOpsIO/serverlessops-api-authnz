@@ -9,4 +9,6 @@
     "TargetOuIds": $secrets.DEPLOYMENT_TARGET_OU,
     "TargetRegions": "us-east-1",
     "TargetAccountIds": $secrets.DEPLOYMENT_TARGET_ACCOUNT_ID,
+    "GitHubSha": $env.GITHUB_SHA,
+    "CfnTemplateBucket": $secrets.CFN_TEMPLATE_BUCKET
 }

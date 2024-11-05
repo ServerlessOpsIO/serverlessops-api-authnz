@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create a Cognito Resource Server
+
+Parameters:
+  GitHubSha:
+    Type: String
+    Description: GitHub SHA
+  CfnTemplateBucket:
+    Type: String
+    Description: The S3 bucket CloudFormation templates are stored
+
+Resources:
+  # Portfolio
+  ApiAuthnzPortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      DisplayName: ServerlessOpsAuthnz
+      Description: "API Authentication & Authorization services"
+      ProviderName: ServerlessOps
+
+  ApiAuthnzPortfolioPrincipalAdmin:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref ApiAuthnzPortfolio
+      PrincipalARN: !Sub 'arn:${AWS::Partition}:iam:::role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_*'
+      PrincipalType: IAM_PATTERN
+
+  ApiAuthnzPortfolioPrincipalPowerUser:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref ApiAuthnzPortfolio
+      PrincipalARN: !Sub 'arn:${AWS::Partition}:iam:::role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSPowerUserAccess_*'
+      PrincipalType: IAM_PATTERN
+
+
+  # Products
+  CognitoResourceServerProduct:
+    Type: AWS::ServiceCatalog::CloudFormationProduct
+    Properties:
+      Name: Cognito Resource Server
+      Description: Create a Cognito Resource Server
+      Owner: ServerlessOps
+      ProvisioningArtifactParameters:
+        - Name: latest
+          Description: latest release
+          Info:
+            LoadTemplateFromURL: !Sub 'https://${CfnTemplateBucket}.s3.amazonaws.com/serverlessops-api-authnz/${GitHubSha}/server/product.yaml'
+
+  CognitoResourceServerProductAssociation:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties:
+      PortfolioId: !Ref ApiAuthnzPortfolio
+      ProductId: !Ref CognitoResourceServerProduct
