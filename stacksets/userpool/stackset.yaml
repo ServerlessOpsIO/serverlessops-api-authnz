@@ -60,3 +60,12 @@ Resources:
       UserPoolId: !Ref UserPool
       CustomDomainConfig:
         CertificateArn: !Ref SiteCertificate
+
+  # SSM Parameters
+  UserPoolIdSsmParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/org/authnz/UserPoolId"
+      Description: User Pool ID
+      Type: String
+      Value: !Ref UserPool
