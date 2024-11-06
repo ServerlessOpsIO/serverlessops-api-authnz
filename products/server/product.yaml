@@ -12,7 +12,7 @@ Parameters:
   ApplicationUrl:
     Type: String
     Description: The URL of the application
-  ScopeName:
+  ScopeEntity:
     Type: String
     Description: The name of the scope
   ReadActionAvailable:
@@ -60,17 +60,17 @@ Resources:
       Scopes:
         - Fn::If:
           - HasReadAction
-          - ScopeName: !Sub '${ScopeName}.read'
+          - ScopeName: !Sub '${ScopeEntity}.read'
             ScopeDescription: Read access
           - Ref: AWS::NoValue
         - Fn::If:
           - HasWriteAction
-          - ScopeName: !Sub '${ScopeName}.write'
+          - ScopeName: !Sub '${ScopeEntity}.write'
             ScopeDescription: Write access
           - Ref: AWS::NoValue
         - Fn::If:
           - HasAdminAction
-          - ScopeName: !Sub '${ScopeName}.admin'
+          - ScopeName: !Sub '${ScopeEntity}.admin'
             ScopeDescription: Admin access
           - Ref: AWS::NoValue
         - Fn::If:
