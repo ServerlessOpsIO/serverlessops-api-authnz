@@ -38,7 +38,6 @@ Resources:
       WriteAttributes:
         - name
       ExplicitAuthFlows:
-        - ALLOW_USER_SRP_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
       SupportedIdentityProviders:
         - COGNITO
