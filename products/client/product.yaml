@@ -12,9 +12,9 @@ Parameters:
   ServerName:
     Type: String
     Description: The name of the server
-  AllowedAuthScopes:
-    Type: CommaDelimitedList
-    Description: The allowed OAuth scopes
+  ScopeEntity:
+    Type: String
+    Description: The name of the scope
   AccessTokenValidity:
     Type: Number
     Description: The time in minutes that the access token is valid
@@ -27,6 +27,36 @@ Parameters:
     Type: Number
     Description: The time in days that the refresh token is valid
     Default: 1
+  ReadScope:
+    Type: String
+    Description: The name of the read scope
+    AllowedValues:
+      - 'true'
+      - 'false'
+  WriteScope:
+    Type: String
+    Description: The name of the write scope
+    AllowedValues:
+      - 'true'
+      - 'false'
+  AdminScope:
+    Type: String
+    Description: The name of the admin scope
+    AllowedValues:
+      - 'true'
+      - 'false'
+  HealthScope:
+    Type: String
+    Description: The name of the health scope
+    AllowedValues:
+      - 'true'
+      - 'false'
+
+Conditions:
+  HasReadScope: !Equals [!Ref ReadScope, 'true']
+  HasWriteScope: !Equals [!Ref WriteScope, 'true']
+  HasAdminScope: !Equals [!Ref AdminScope, 'true']
+  HasHealthScope: !Equals [!Ref HealthScope, 'true']
 
 Resources:
   CognitoUserPoolClient:
@@ -47,7 +77,23 @@ Resources:
       AllowedOAuthFlowsUserPoolClient: true
       AllowedOAuthFlows:
         - client_credentials
-      AllowedOAuthScopes: !Ref AllowedAuthScopes
+      AllowedOAuthScopes:
+        - Fn::If:
+          - HasReadScope
+          - !Sub 'https://${ServerName}/${ScopeEntity}.read'
+          - Ref: AWS::NoValue
+        - Fn::If:
+          - HasWriteScope
+          - !Sub 'https://${ServerName}/${ScopeEntity}.write'
+          - Ref: AWS::NoValue
+        - Fn::If:
+          - HasAdminScope
+          - !Sub 'https://${ServerName}/${ScopeEntity}.admin'
+          - Ref: AWS::NoValue
+        - Fn::If:
+          - HasHealthScope
+          - !Sub 'https://${ServerName}/health.read'
+          - Ref: AWS::NoValue
       ReadAttributes:
         - name
       WriteAttributes:
