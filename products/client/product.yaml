@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create a Cognito User Pool Client
+
+Parameters:
+  CognitoUserPoolId:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: The ID of the user pool to which the resource server belongs
+    Default: /org/authnz/UserPoolId
+  ClientName:
+    Type: String
+    Description: The name of the client
+  AllowedAuthScopes:
+    Type: CommaDelimitedList
+    Description: The allowed OAuth scopes
+
+Resources:
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Ref ClientName
+      UserPoolId: !Ref CognitoUserPoolId
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+      GenerateSecret: true
+      TokenValidityUnits:
+        IdToken: minutes
+        AccessToken: minutes
+        RefreshToken: days
+      AccessTokenValidity: 10
+      IdTokenValidity: 10
+      RefreshTokenValidity: 1
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - client_credentials
+      AllowedOAuthScopes: !Ref AllowedAuthScopes
+      ReadAttributes:
+        - name
+      WriteAttributes:
+        - name
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      SupportedIdentityProviders:
+        - COGNITO

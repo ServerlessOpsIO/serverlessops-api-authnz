@@ -51,3 +51,21 @@ Resources:
     Properties:
       PortfolioId: !Ref ApiAuthnzPortfolio
       ProductId: !Ref CognitoResourceServerProduct
+
+  CognitoUserPoolClientProduct:
+    Type: AWS::ServiceCatalog::CloudFormationProduct
+    Properties:
+      Name: Cognito User Pool Client
+      Description: Create a Cognito User Pool Client
+      Owner: ServerlessOps
+      ProvisioningArtifactParameters:
+        - Name: latest
+          Description: latest release
+          Info:
+            LoadTemplateFromURL: !Sub 'https://${CfnTemplateBucket}.s3.amazonaws.com/serverlessops-api-authnz/${GitHubSha}/client/product.yaml'
+
+  CognitoUserPoolClientProductAssociation:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties:
+      PortfolioId: !Ref ApiAuthnzPortfolio
+      ProductId: !Ref CognitoUserPoolClientProduct

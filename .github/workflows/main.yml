@@ -35,6 +35,9 @@ jobs:
       - name: Validate template (products stackset)
         run: sam validate --lint --template ./products/stackset.yaml
 
+      - name: Validate template (client product)
+        run: sam validate --lint --template ./products/client/product.yaml
+
       - name: Validate template (server product)
         run: sam validate --lint --template ./products/server/product.yaml
 
