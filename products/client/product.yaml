@@ -62,7 +62,7 @@ Resources:
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Sub "${ClientName}@${ServerName}"
+      ClientName: !Sub "${ClientName}@${ServerName}+${ScopeEntity}"
       UserPoolId: !Ref CognitoUserPoolId
       PreventUserExistenceErrors: ENABLED
       EnableTokenRevocation: true
