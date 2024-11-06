@@ -9,6 +9,9 @@ Parameters:
   ClientName:
     Type: String
     Description: The name of the client
+  ServerName:
+    Type: String
+    Description: The name of the server
   AllowedAuthScopes:
     Type: CommaDelimitedList
     Description: The allowed OAuth scopes
@@ -29,7 +32,7 @@ Resources:
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Ref ClientName
+      ClientName: !Sub "${ClientName}@${ServerName}"
       UserPoolId: !Ref CognitoUserPoolId
       PreventUserExistenceErrors: ENABLED
       EnableTokenRevocation: true
