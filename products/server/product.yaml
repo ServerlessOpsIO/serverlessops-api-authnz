@@ -29,13 +29,6 @@ Parameters:
       - 'true'
       - 'false'
     Default: 'true'
-  ListActionAvailable:
-    Type: String
-    Description: Whether the list scope is available
-    AllowedValues:
-      - 'true'
-      - 'false'
-    Default: 'true'
   AdminActionAvailable:
     Type: String
     Description: Whether the admin scope is available
@@ -47,7 +40,6 @@ Parameters:
 Conditions:
   HasReadAction: !Equals [!Ref ReadActionAvailable, 'true']
   HasWriteAction: !Equals [!Ref WriteActionAvailable, 'true']
-  HasListAction: !Equals [!Ref ListActionAvailable, 'true']
   HasAdminAction: !Equals [!Ref AdminActionAvailable, 'true']
 
 Resources:
@@ -67,11 +59,6 @@ Resources:
           - HasWriteAction
           - ScopeName: !Sub '${ScopeName}.write'
             ScopeDescription: Write access
-          - Ref: AWS::NoValue
-        - Fn::If:
-          - HasListAction
-          - ScopeName: !Sub '${ScopeName}.list'
-            ScopeDescription: List access
           - Ref: AWS::NoValue
         - Fn::If:
           - HasAdminAction
