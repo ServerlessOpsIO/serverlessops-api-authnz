@@ -12,6 +12,18 @@ Parameters:
   AllowedAuthScopes:
     Type: CommaDelimitedList
     Description: The allowed OAuth scopes
+  AccessTokenValidity:
+    Type: Number
+    Description: The time in minutes that the access token is valid
+    Default: 10
+  IdTokenValidity:
+    Type: Number
+    Description: The time in minutes that the ID token is valid
+    Default: 10
+  RefreshTokenValidityDays:
+    Type: Number
+    Description: The time in days that the refresh token is valid
+    Default: 1
 
 Resources:
   CognitoUserPoolClient:
@@ -26,9 +38,9 @@ Resources:
         IdToken: minutes
         AccessToken: minutes
         RefreshToken: days
-      AccessTokenValidity: 10
-      IdTokenValidity: 10
-      RefreshTokenValidity: 1
+      AccessTokenValidity: !Ref AccessTokenValidity
+      IdTokenValidity: !Ref IdTokenValidity
+      RefreshTokenValidity: !Ref RefreshTokenValidityDays
       AllowedOAuthFlowsUserPoolClient: true
       AllowedOAuthFlows:
         - client_credentials
