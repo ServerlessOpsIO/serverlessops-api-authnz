@@ -36,11 +36,19 @@ Parameters:
       - 'true'
       - 'false'
     Default: 'false'
+  HealthActionAvailable:
+    Type: String
+    Description: Whether the admin scope is available
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'true'
 
 Conditions:
   HasReadAction: !Equals [!Ref ReadActionAvailable, 'true']
   HasWriteAction: !Equals [!Ref WriteActionAvailable, 'true']
   HasAdminAction: !Equals [!Ref AdminActionAvailable, 'true']
+  HasHealthAction: !Equals [!Ref HealthActionAvailable, 'true']
 
 Resources:
   CognitoResourceServer:
@@ -64,4 +72,9 @@ Resources:
           - HasAdminAction
           - ScopeName: !Sub '${ScopeName}.admin'
             ScopeDescription: Admin access
+          - Ref: AWS::NoValue
+        - Fn::If:
+          - HasHealthAction
+          - ScopeName: 'health.read'
+            ScopeDescription: Health access
           - Ref: AWS::NoValue
