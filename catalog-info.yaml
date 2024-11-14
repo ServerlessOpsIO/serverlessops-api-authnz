@@ -10,4 +10,4 @@ spec:
   type: api
   lifecycle: production
   owner: group:admins
-  system: ServerlessOps API Authnz
+  system: serverlessops-api-authnz
