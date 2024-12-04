@@ -29,25 +29,25 @@ Parameters:
     Default: 1
   ReadScope:
     Type: String
-    Description: The name of the read scope
+    Description: Has read scope
     AllowedValues:
       - 'true'
       - 'false'
   WriteScope:
     Type: String
-    Description: The name of the write scope
+    Description: Has write scope
     AllowedValues:
       - 'true'
       - 'false'
   AdminScope:
     Type: String
-    Description: The name of the admin scope
+    Description: Has admin scope
     AllowedValues:
       - 'true'
       - 'false'
   HealthScope:
     Type: String
-    Description: The name of the health scope
+    Description: Has health scope
     AllowedValues:
       - 'true'
       - 'false'
