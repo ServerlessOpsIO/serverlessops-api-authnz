@@ -5,9 +5,9 @@ metadata:
   name: serverlessops-api-authnz
   description: ServerlessOps API Authnz Service
   annotations:
-    github.com/project-slug: ServerlessOpsIO/serverlessops-api-authnz/=
+    github.com/project-slug: ServerlessOpsIO/serverlessops-api-authnz
 spec:
   type: api
   lifecycle: production
   owner: group:admins
-  system: serverlessops-api-authnz
+  system: infrastructure-services
