@@ -9,5 +9,5 @@ metadata:
 spec:
   type: api
   lifecycle: production
-  owner: group:admins
+  owner: group:0319y80a3hmm9y7
   system: infrastructure-services
