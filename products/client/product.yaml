@@ -18,11 +18,11 @@ Parameters:
   AccessTokenValidity:
     Type: Number
     Description: The time in minutes that the access token is valid
-    Default: 10
+    Default: 720
   IdTokenValidity:
     Type: Number
     Description: The time in minutes that the ID token is valid
-    Default: 10
+    Default: 720
   RefreshTokenValidityDays:
     Type: Number
     Description: The time in days that the refresh token is valid
