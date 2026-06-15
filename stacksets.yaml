@@ -12,9 +12,6 @@ Parameters:
   TargetOuIds:
     Type: CommaDelimitedList
     Description: "Organizational Units to deploy to"
-  TargetAccountIds:
-    Type: CommaDelimitedList
-    Description: "Accounts to deploy to"
   GitHubSha:
     Type: String
     Description: GitHub SHA
@@ -35,9 +32,7 @@ Resources:
           ParameterValue: !Ref CfnTemplateBucket
       StackInstancesGroup:
         - DeploymentTargets:
-            AccountFilterType: INTERSECTION
             OrganizationalUnitIds: !Ref TargetOuIds
-            Accounts: !Ref TargetAccountIds
           Regions: !Ref TargetRegions
       AutoDeployment:
         Enabled: true

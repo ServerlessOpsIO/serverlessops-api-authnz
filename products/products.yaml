@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Create a Cognito Resource Server
+Description: ServerlessOps API Authnz Service Catalog Products
 
 Parameters:
   GitHubSha:
@@ -44,7 +44,7 @@ Resources:
         - Name: latest
           Description: latest release
           Info:
-            LoadTemplateFromURL: !Sub 'https://${CfnTemplateBucket}.s3.amazonaws.com/serverlessops-api-authnz/${GitHubSha}/server/product.yaml'
+            LoadTemplateFromURL: !Sub 'https://${CfnTemplateBucket}.s3.amazonaws.com/serverlessops-api-authnz/${GitHubSha}/server/template.yaml'
 
   CognitoResourceServerProductAssociation:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
@@ -62,7 +62,7 @@ Resources:
         - Name: latest
           Description: latest release
           Info:
-            LoadTemplateFromURL: !Sub 'https://${CfnTemplateBucket}.s3.amazonaws.com/serverlessops-api-authnz/${GitHubSha}/client/product.yaml'
+            LoadTemplateFromURL: !Sub 'https://${CfnTemplateBucket}.s3.amazonaws.com/serverlessops-api-authnz/${GitHubSha}/client/template.yaml'
 
   CognitoUserPoolClientProductAssociation:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
