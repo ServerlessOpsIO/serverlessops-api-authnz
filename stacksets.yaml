@@ -1,0 +1,55 @@
+Metadata:
+  Products:
+    localTemplateFile: &products_template_body ./products/products.yaml
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ServerlessOps API Authnz Service
+
+Parameters:
+  TargetRegions:
+    Type: CommaDelimitedList
+    Description: "Regions to deploy to"
+  TargetOuIds:
+    Type: CommaDelimitedList
+    Description: "Organizational Units to deploy to"
+  TargetAccountIds:
+    Type: CommaDelimitedList
+    Description: "Accounts to deploy to"
+  GitHubSha:
+    Type: String
+    Description: GitHub SHA
+  CfnTemplateBucket:
+    Type: String
+    Description: The S3 bucket CloudFormation templates are stored
+
+Resources:
+  ProductsStackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: ServerlessOpsAuthnzProducts
+      Description: ServerlessOps Authnz Service Catalog Products
+      Parameters:
+        - ParameterKey: GitHubSha
+          ParameterValue: !Ref GitHubSha
+        - ParameterKey: CfnTemplateBucket
+          ParameterValue: !Ref CfnTemplateBucket
+      StackInstancesGroup:
+        - DeploymentTargets:
+            AccountFilterType: INTERSECTION
+            OrganizationalUnitIds: !Ref TargetOuIds
+            Accounts: !Ref TargetAccountIds
+          Regions: !Ref TargetRegions
+      AutoDeployment:
+        Enabled: true
+        RetainStacksOnAccountRemoval: false
+      ManagedExecution:
+        Active: true
+      OperationPreferences:
+        RegionConcurrencyType: PARALLEL
+        FailureToleranceCount: 1
+        MaxConcurrentCount: 5
+      PermissionModel: SERVICE_MANAGED
+      Capabilities:
+        - CAPABILITY_NAMED_IAM
+        - CAPABILITY_AUTO_EXPAND
+      TemplateBody: *products_template_body

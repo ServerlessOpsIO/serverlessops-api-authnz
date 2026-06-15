@@ -1,22 +1,7 @@
-Metadata:
-  UserPool:
-    localTemplateFile: &user_pool_template_body ./stacksets/userpool/stackset.yaml
-  Products:
-    localTemplateFile: &products_template_body ./products/stackset.yaml
-
 AWSTemplateFormatVersion: '2010-09-09'
-Description: ServerlessOps API Authnz Service
+Description: ServerlessOps API Authnz
 
 Parameters:
-  TargetRegions:
-    Type: CommaDelimitedList
-    Description: "Regions to deploy to"
-  TargetOuIds:
-    Type: CommaDelimitedList
-    Description: "Organizational Units to deploy to"
-  TargetAccountIds:
-    Type: CommaDelimitedList
-    Description: "Accounts to deploy to"
   UserPoolName:
     Type: String
     Description: Name of UserPool
@@ -25,75 +10,73 @@ Parameters:
     Description: Name of UserPool Domain
   ParentDnsZoneId:
     Type: String
-    Description: "Route53 Hosted Zone ID of parent zone"
-  GitHubSha:
-    Type: String
-    Description: GitHub SHA
-  CfnTemplateBucket:
-    Type: String
-    Description: The S3 bucket CloudFormation templates are stored
+    Description: "Route53 Hosted Zone ID"
 
 Resources:
-  UserPoolStackSet:
-    Type: AWS::CloudFormation::StackSet
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
-      StackSetName: ServerlessOpsAuthnz
-      Description: ServerlessOps Cognito User Pool
-      Parameters:
-        - ParameterKey: UserPoolName
-          ParameterValue: !Ref UserPoolName
-        - ParameterKey: UserPoolDomainName
-          ParameterValue: !Ref UserPoolDomainName
-        - ParameterKey: ParentDnsZoneId
-          ParameterValue: !Ref ParentDnsZoneId
-      StackInstancesGroup:
-        - DeploymentTargets:
-            AccountFilterType: INTERSECTION
-            OrganizationalUnitIds: !Ref TargetOuIds
-            Accounts: !Ref TargetAccountIds
-          Regions: !Ref TargetRegions
-      AutoDeployment:
-        Enabled: true
-        RetainStacksOnAccountRemoval: false
-      ManagedExecution:
-        Active: true
-      OperationPreferences:
-        RegionConcurrencyType: PARALLEL
-        FailureToleranceCount: 1
-        MaxConcurrentCount: 5
-      PermissionModel: SERVICE_MANAGED
-      Capabilities:
-        - CAPABILITY_NAMED_IAM
-        - CAPABILITY_AUTO_EXPAND
-      TemplateBody: *user_pool_template_body
+      UserPoolName: !Ref UserPoolName
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
 
-  ProductsStackSet:
-    Type: AWS::CloudFormation::StackSet
+  # DNS
+  #
+  # Cognito site verification requires either an A record at the root of the site's domain or a
+  # delegation to another zone. Rathert than mess with the serverlessops.io apex record we
+  # create a new zone for the user pool domain and add a delegation set to the parent zone.
+
+  AuthnzZone:
+    Type: "AWS::Route53::HostedZone"
     Properties:
-      StackSetName: ServerlessOpsAuthnzProducts
-      Description: ServerlessOps Authnz Service Catalog Products
-      Parameters:
-        - ParameterKey: GitHubSha
-          ParameterValue: !Ref GitHubSha
-        - ParameterKey: CfnTemplateBucket
-          ParameterValue: !Ref CfnTemplateBucket
-      StackInstancesGroup:
-        - DeploymentTargets:
-            AccountFilterType: INTERSECTION
-            OrganizationalUnitIds: !Ref TargetOuIds
-            Accounts: !Ref TargetAccountIds
-          Regions: !Ref TargetRegions
-      AutoDeployment:
-        Enabled: true
-        RetainStacksOnAccountRemoval: false
-      ManagedExecution:
-        Active: true
-      OperationPreferences:
-        RegionConcurrencyType: PARALLEL
-        FailureToleranceCount: 1
-        MaxConcurrentCount: 5
-      PermissionModel: SERVICE_MANAGED
-      Capabilities:
-        - CAPABILITY_NAMED_IAM
-        - CAPABILITY_AUTO_EXPAND
-      TemplateBody: *products_template_body
+      Name: !Ref UserPoolDomainName
+      HostedZoneConfig:
+        Comment: ServerlessOps Authnz
+
+  AuthnzDelegationSet:
+    Type: "AWS::Route53::RecordSet"
+    Properties:
+      HostedZoneId: !Ref ParentDnsZoneId
+      Name: !Ref UserPoolDomainName
+      Type: NS
+      TTL: '3600'
+      ResourceRecords: !GetAtt AuthnzZone.NameServers
+
+  AuthnzARecord:
+    Type: "AWS::Route53::RecordSet"
+    Properties:
+      HostedZoneId: !Ref AuthnzZone
+      Name: !Ref UserPoolDomainName
+      Type: A
+      AliasTarget:
+        HostedZoneId: Z2FDTNDATAQYW2
+        DNSName: !GetAtt UserPoolDomain.CloudFrontDistribution
+        EvaluateTargetHealth: false
+
+  SiteCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref UserPoolDomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref UserPoolDomainName
+          HostedZoneId: !GetAtt AuthnzZone.Id
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref UserPoolDomainName
+      UserPoolId: !Ref UserPool
+      CustomDomainConfig:
+        CertificateArn: !Ref SiteCertificate
+
+  # SSM Parameters
+  UserPoolIdSsmParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/org/authnz/UserPoolId"
+      Description: User Pool ID
+      Type: String
+      Value: !Ref UserPool
